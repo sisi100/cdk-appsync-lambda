@@ -1,15 +1,21 @@
 from aws_cdk import core as cdk
-
-# For consistency with other languages, `cdk` is the preferred import name for
-# the CDK's core module.  The following line also imports it as `core` for use
-# with examples from the CDK Developer's Guide, which are in the process of
-# being updated to use `cdk`.  You may delete this import if you don't need it.
-from aws_cdk import core
+import aws_cdk.aws_appsync as appsync
+from aws_cdk.aws_lambda import Runtime
+from aws_cdk.aws_lambda_python import PythonFunction
 
 
 class CdkAppsyncLambdaStack(cdk.Stack):
-
     def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # The code that defines your stack goes here
+        lambda_ = PythonFunction(self, f"HogeLambda", entry="src", runtime=Runtime.PYTHON_3_9)
+
+        api = appsync.GraphqlApi(
+            self, "HogeApi", name="HogeApi", schema=appsync.Schema.from_asset("./schema/schema.graphql"),
+        )
+
+        lambda_datasource = api.add_lambda_data_source("HogeLambdaSource", lambda_)
+        lambda_datasource.create_resolver(type_name="Query", field_name="getUsers")
+        lambda_datasource.create_resolver(
+            type_name="Mutation", field_name="addUser",
+        )
