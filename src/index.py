@@ -1,16 +1,10 @@
-def get_users(arguments):
+def getUsers(arguments):
     return [{"id": "hogehoge", "name": "ししぃ"}]  # ダミー
 
 
-def add_user(arguments):
+def addUser(arguments):
     return dict(**arguments)  # ダミー
 
 
-resolvers = {
-    "getUsers": get_users,
-    "addUser": add_user,
-}
-
-
 def handler(event, context):
-    return resolvers[event["info"]["fieldName"]](event["arguments"])
+    return globals()[event["info"]["fieldName"]](event["arguments"])
